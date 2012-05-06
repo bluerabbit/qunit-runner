@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QUnit Runner Test Suite</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="/css/qunit.css" type="text/css" media="screen">
+    <script type="text/javascript" src="/js/qunit.js"></script>
+    <script type="text/javascript">
+        function runTest(script) {
+            try {
+                eval(script);
+            } catch (e) {
+                test('Error', function() {
+                    ok(false, e);
+                });
+            }
+        }
+        chrome.extension.sendRequest({id:location.hash.slice(1)}, function(item){
+            runTest(item.script);
+        });
+    </script>
+</head>
+<body>
+    <ol id="qunit-tests"></ol>
+    <div id="qunit-fixture">test markup</div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src="/js/jquery-1.5.2.js"></script>
+<script type="text/javascript" src="/js/notification.js"></script>
+<script type="text/javascript">
+var notification = new Notification('html/notification.html', 1000 * 10);
+chrome.browserAction.onClicked.addListener(function () {
+  chrome.tabs.create({"url":"/html/options.html", "selected":true});
+});
+
+chrome.extension.onRequest.addListener(function(message, sender, sendResponse){
+	console.debug(message);
+    sendResponse(notification.getItem(message.id));
+});
+</script>

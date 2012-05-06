@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QUnit Runner Test Suite</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="/css/qunit.css" type="text/css" media="screen">
+    <script type="text/javascript" src="/js/jquery-1.5.2.js"></script>
+    <script type="text/javascript" src="/js/timer.js"></script>
+    <script type="text/javascript" src="/js/qunit.js"></script>
+    <script type="text/javascript">
+        var BG = chrome.extension.getBackgroundPage();
+        var testFiles = [];
+        var timer = new Timer(3000, function () {
+            testFiles.forEach(function (file) {
+
+            });
+        });
+        $(function() {
+            $('#run').click(function() {
+                QUnit.init();
+                try {
+                    eval($('#fileContent').val());
+                } catch (e) {
+                    test('Error', function() {
+                        ok(false, e);
+                    });
+                }
+                QUnit.start();
+                $('#fileContent').focus();
+            });
+
+            $('#file').change(function() {
+              readFile(this.files[0], $('#encoding').val());
+            });
+
+            $('#drop_field').bind('dragover', function(e) {
+                e.preventDefault();
+            }).bind('drop', function(e) {
+                readFile(e.originalEvent.dataTransfer.files[0], $('#encoding').val());
+                e.stopPropagation();
+            }).click(function() {
+                $('#file').click();
+            });
+
+            setTimeout(function() {
+                $('#run').click();
+                $('#fileContent').focus();
+            }, 500);
+        });
+
+        function readFile(file, encoding) {
+            var reader = new FileReader();
+            reader.onloadend = function(e) {
+              $('#fileContent').text(reader.result);
+              $('#run').click();
+            };
+            reader.onerror = function() {
+              switch (reader.error.code) {
+              case FileError.NOT_FOUND_ERR:
+                alert('FileError.NOT_FOUND_ERR');
+                break;
+              case FileError.NOT_READABLE_ERR:
+                alert('FileError.NOT_READABLE_ERR');
+                break;
+              case FileError.SECURITY_ERR:
+                alert('FileError.SECURITY_ERR');
+                break;
+              case FileError.ABORT_ERR:
+                alert('FileError.ABORT_ERR');
+                break;
+              case FileError.ENCODING_ERR:
+                alert('FileError.ENCODING_ERR');
+                break;
+              }
+            };
+            reader.readAsText(file, encoding);
+        }
+    </script>
+</head>
+<body>
+    <h1 id="qunit-header">QUnit Runner</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+    <div id="qunit-fixture">test markup</div>
+
+<div id="drop_field" style="width:100%; height:50px; border: 1px solid gray; background:#FFFACD;">
+	<table width="100%" height="100%">
+	<tr width="100%" align="center" valign="center">
+		<td><b>Drag and Drop File</b></td>
+	</tr>
+	</table>
+</div>
+<input id="run" type="button" value="  QUnit Run  " onblur="$('#fileContent').focus();">
+File Encoding:
+<select id="encoding" tabindex="5">
+    <option selected>UTF-8</option>
+    <option>Shift_JIS</option>
+    <option>Windows-31J</option>
+    <option>EUC-JP</option>
+</select>
+<a href="/html/autotest.html">autotest</a>
+<br />
+<textarea id="fileContent" rows="30" cols="130" onblur="$('#run').focus();">
+module('QUnit Runner example', {
+  setup: function() {
+  },
+  teardown: function() {
+  }
+});
+
+test('Test example', function() {
+  ok(true, 'Green');
+  equal(1, '1', "1 == '1'");
+  same(1, 1, '1 === 1');
+});
+
+test('cross-domain Ajax requests.', 1, function() {
+  stop(1000);
+  $.get('http://www.google.com', function(html) {
+    start();
+    ok(html != null, 'cross-domain Ajax pass');
+  });
+});
+</textarea>
+<br />
+<input id="file" name="file" type="file">
+</body>
+</html>

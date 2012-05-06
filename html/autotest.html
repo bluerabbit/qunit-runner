@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QUnit Runner AutoTest</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script type="text/javascript" src="/js/jquery-1.5.2.js"></script>
+    <script type="text/javascript" src="/js/timer.js"></script>
+    <script type="text/javascript">
+        var BG = chrome.extension.getBackgroundPage();
+        var testFiles = {};
+        var scripts = [];
+        var lastTestDate = new Date();
+        var timer = new Timer(1000 * 3);
+        timer.start(autotest);
+
+        function autotest() {
+            if (!isFileChange()) {
+                return;
+            }
+            lastTestDate = new Date();
+            var keys = Object.keys(testFiles);
+            scripts = [];
+            loop(0);
+            function loop(index) {
+                var file = testFiles[keys[index]];
+                console.log(file);
+                fileRead(file, function(txt) {
+                    console.log(txt);
+                    scripts.push(txt);
+                    if (keys.length == index + 1) {
+                        BG.notification.open({script:scripts.join(' ')});
+                        return;
+                    }
+                    loop(index + 1);
+                });
+            }
+        }
+
+        function fileRead(file, callback) {
+            var reader = new FileReader();
+            reader.onloadend = function(e) {
+                callback(reader.result);
+            };
+            reader.readAsText(file, $('#encoding').val());
+        }
+
+        function isFileChange() {
+            var isChange = false;
+            Object.keys(testFiles).forEach(function (key) {
+                if (testFiles[key].lastModifiedDate > lastTestDate) {
+                    isChange = true;
+                }
+            });
+            return isChange;
+        }
+
+        $(function() {
+            $(':file').change(function() {
+                testFiles[$(this).attr('id')] = this.files[0];
+            });
+        });
+    </script>
+</head>
+<body>
+<h3>ファイルを選択後にファイルを編集するとQUnitが自動実行されます。ファイルはドラッグ&ドロップも出来ます</h3>
+<input id="file1" type="file"><br />
+<input id="file2" type="file"><br />
+<input id="file3" type="file"><br />
+<input id="file4" type="file"><br />
+<input id="file5" type="file"><br />
+<input id="file6" type="file"><br />
+File Encoding:
+<select id="encoding">
+    <option selected>UTF-8</option>
+    <option>Shift_JIS</option>
+    <option>Windows-31J</option>
+    <option>EUC-JP</option>
+</select>
+</body>
+</html>
